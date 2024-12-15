@@ -1,6 +1,5 @@
 module Main where
 
-import Lexer
 import Parser
 import System.Environment (getArgs)
 
@@ -12,7 +11,13 @@ main = do
   args <- getArgs
   let fileName = parseArgs args
   file <- readFile fileName
-  let lexed = Lexer.lex file
-  let parsed = Parser.parse lexed
+  let (lexed, parsed, checked) = Parser.parseDebug file
+  print "------------"
+  print "Lexed: "
   print lexed
+  print "------------"
+  print "Parsed: "
   print parsed
+  print "------------"
+  print "Checked: "
+  print checked

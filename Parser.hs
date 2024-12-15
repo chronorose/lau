@@ -1,14 +1,38 @@
-module Parser (Exp (..), parse) where
+module Parser (Exp (..), parse, parseDebug) where
 
 -- TODO: normal error handling with either.
+-- devise architecture of parser in which unary ops work well.
+-- (doesn't mean they don't work there, but certainly not good enough)
 
-import Lexer hiding (lex)
+import Lexer
 
 data Exp
   = Num Int
   | Func Function [Exp]
-  deriving (Show)
+  deriving (Show, Eq)
 
+arity exp =
+  case exp of
+    Read -> 0
+    Plus -> 2
+    Multiply -> 2
+
+checkForArity (Num _) = True
+checkForArity (Func t expList) = (arity t == length expList) && checkExprsForArity expList
+
+checkExprsForArity :: [Exp] -> Bool
+checkExprsForArity = all checkForArity
+
+checks = [checkExprsForArity]
+
+allChecks exps = all (\check -> check exps) checks
+
+check :: [Exp] -> Maybe [Exp]
+check exps
+  | allChecks exps = Just exps
+  | otherwise = Nothing
+
+expectRParen :: Exp -> [Token] -> (Exp, [Token])
 expectRParen expr (t : tokens)
   | t == RightParen = (expr, tokens)
   | otherwise = error "incorrect input."
@@ -38,9 +62,16 @@ parseExpr (t : tokens) =
     LeftParen -> parseFirst tokens
     _ -> error "Incorrect expression."
 
-parseImpl [] acc = reverse acc
-parseImpl tokens acc = parseImpl rest (exp : acc)
+parseImpl acc [] = reverse acc
+parseImpl acc tokens = parseImpl (exp : acc) rest
   where
     (exp, rest) = parseExpr tokens
 
-parse tokens = parseImpl tokens []
+parse :: String -> Maybe [Exp]
+parse = check . parseImpl [] . Lexer.lex
+
+parseDebug str = (lexed, parsed, checked)
+  where
+    lexed = Lexer.lex str
+    parsed = parseImpl [] lexed
+    checked = check parsed
