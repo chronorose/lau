@@ -1,4 +1,4 @@
-module Lexer where
+module Lexer (Lexer.lex, Function (..), Token (..)) where
 
 -- TODO: refactor it with Either so that implementation tells you exact place in which
 -- incorrect input took place and doesn't 'just' crash. for now it's fine.
@@ -6,20 +6,19 @@ module Lexer where
 
 import Data.Char
 
-data KeywordType
+data Function
   = Plus
   | Minus
   | Multiply
   | Read
-  deriving (Show)
+  deriving (Show, Eq)
 
 data Token
   = LeftParen
   | RightParen
   | Number Int
-  | Ident String
-  | Keyword KeywordType
-  deriving (Show)
+  | Keyword Function
+  deriving (Show, Eq)
 
 symbols = ['(', ')', '+', '-', '*']
 
@@ -54,7 +53,7 @@ matchKeyword word =
 wordMatch :: String -> (Maybe Token, String)
 wordMatch str
   | isKeyword word = (Just $ matchKeyword word, rest)
-  | otherwise = (Just $ Ident word, rest)
+  | otherwise = error "incorrect keyword."
   where
     (word, rest) = break (\s -> isSpace s || isParen s) str
 
