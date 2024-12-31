@@ -16,10 +16,13 @@ type Type = String
 
 type FuncParams = (String, Type)
 
+newtype Module = Module [Fn]
+
+data Fn = Func Type String [FuncParams] [Stmt]
+
 data Expr
   = Num Int
   | Name String
-  | Func Type String [FuncParams] [Stmt]
   | InfixFunc String Expr Expr
   | FuncCall String [Expr]
   deriving (Eq)
@@ -29,6 +32,8 @@ instance Show Expr where
   show (Name str) = "(i64 " ++ str ++ ")"
   show (InfixFunc name e1 e2) = show e1 ++ name ++ show e2
   show (FuncCall name es) = name ++ "(" ++ intercalate ", " (map show es) ++ ")"
+
+instance Show Fn where
   show (Func t name params stmts) = t ++ " " ++ name ++ "(" ++ showParams params ++ ")\n" ++ statements
     where
       showParams [] = ""
@@ -130,24 +135,23 @@ var = do
 uexpr e1 = do
   (fname, e2) <- do
     s <- funcName
-    trace (show s) return ()
     e <- expr
     return (s, e)
   return (InfixFunc fname e1 e2)
 
 expr = do
   spaces
-  exp <- try numExpr <|> try fnCall <|> var
-  trace (show exp) return ()
+
+  exp <-
+    try (between (char '(') (char ')') expr)
+      <|> try numExpr
+      <|> try fnCall
+      <|> var
+
   inf <- optionMaybe $ try $ uexpr exp
   case inf of
     Just e -> return e
     Nothing -> return exp
-
-infixFunc = do
-  arg1 <- expr
-  f <- funcName
-  InfixFunc f arg1 <$> expr
 
 wordOrKeyword =
   let kwSearch lword = find (\(str, _) -> str == lword) keywordList
