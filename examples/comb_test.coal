@@ -1,0 +1,3 @@
+fnc v(hey: arg, p: args) -> Args {
+  a := call_me(a);
+}

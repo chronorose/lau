@@ -1,6 +1,6 @@
 module Main where
 
-import Parser (p)
+import Parser (parseToAST)
 import System.Environment (getArgs)
 
 parseArgs [] = error "Not enough arguments given."
@@ -11,4 +11,4 @@ main = do
   args <- getArgs
   let fileName = parseArgs args
   file <- readFile fileName
-  print $ p file
+  print $ parseToAST file
