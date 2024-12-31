@@ -1,4 +1,4 @@
-module ParseTest where
+module Parser where
 
 import Data.Char (isAlphaNum, isDigit, isLetter)
 import Data.List (find)
@@ -16,8 +16,6 @@ type FuncParams = (String, Type)
 data Expr
   = Num Int
   | Name String
-  | For Expr [Expr]
-  | If Expr [Expr]
   | Func Type String [FuncParams] [Stmt]
   | InfixFunc String Expr Expr
   | FuncCall String [Expr]
@@ -26,6 +24,8 @@ data Expr
 data Stmt
   = Assign String Expr
   | Declare String Expr
+  | For Expr [Stmt]
+  | If Expr [Stmt]
   deriving (Show)
 
 funcName :: Parsec String st String
@@ -116,3 +116,5 @@ wordOrKeyword =
             Just (str, _) -> Name str -- have to parse for exact keyword here
             Nothing -> Name lword
        in checkForKeyword <$> word
+
+p = parse func "something went wrong while parsing function"

@@ -1,9 +1,3 @@
-## lau
+## coal
 
-very simple compiler of very simple lisp-like language in early stages of development for educational purposes.
-
-ready parts:
-- [x] Lexer(done, but refactoring needed.)
-- [ ] Parser 
-- [ ] Codegen 
-- [ ] Optimizations
+compiler of coal language using haskell for educational purposes during very early stages of development
